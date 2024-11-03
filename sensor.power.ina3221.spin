@@ -91,6 +91,21 @@ PUB adc2volts(a)
 PUB adc2watts(a)
 
 
+PUB adc_chan_ena(m=-2): c
+' Enable ADC channels
+'   m:  bitmask of enabled channels
+'       b2: CH1
+'       b1: CH2
+'       b0: CH3
+'   Returns:
+'       current mask, if m is outside the above range
+    c := readreg(core.CONFIG)
+    if ( (m => %000) and (m =< %111) )
+        writereg(core.CONFIG, (c & core.CH_EN_CLEAR) | (m << core.CH_EN) )
+    else
+        return ( (c >> core.CH_EN) & core.CH_EN_BITS )
+
+
 PUB current_data(): a
 
 

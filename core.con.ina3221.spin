@@ -21,7 +21,7 @@ CON
 
 ' Register definitions
     CONFIG              = $00
-    CONFIG_REGMASK      = $ff
+    CONFIG_REGMASK      = $ffff
         RST             = 15
         CH1_EN          = 14
         CH2_EN          = 13
