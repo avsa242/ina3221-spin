@@ -20,7 +20,44 @@ CON
     DEVID_RESP      = $3220                     ' device ID expected response
 
 ' Register definitions
-    CONFIG          = $00
+    CONFIG              = $00
+    CONFIG_REGMASK      = $ff
+        RST             = 15
+        CH1_EN          = 14
+        CH2_EN          = 13
+        CH3_EN          = 12
+        AVG2            = 11
+        AVG1            = 10
+        AVG0            = 9
+        VBUS_CT2        = 8
+        VBUS_CT1        = 7
+        VBUS_CT0        = 6
+        VSH_CT2         = 5
+        VSH_CT1         = 4
+        VSH_CT0         = 3
+        MODE3           = 2
+        MODE2           = 1
+        MODE1           = 0
+        ' compounds of above multi-bit fields
+        CH_EN           = 12
+        AVG             = 9
+        VBUS_CT         = 6
+        VSH_CT          = 3
+        MODE            = 0
+        ' bitmasks: allow ( reg & x_BITS )
+        CH_EN_BITS      = %111
+        AVG_BITS        = %111
+        VBUS_CT_BITS    = %111
+        VSH_CT_BITS     = %111
+        MODE_BITS       = %111
+        ' bitmasks: clear ( reg & x_CLEAR )
+        CH_EN_CLEAR     = (CH_EN_BITS << CH_EN) ^ CONFIG_REGMASK
+        AVG_CLEAR       = (AVG_BITS << AVG) ^ CONFIG_REGMASK
+        VBUS_CT_CLEAR   = (VBUS_CT_BITS << VBUS_CT) ^ CONFIG_REGMASK
+        VSH_CT_CLEAR    = (VSH_CT_BITS << VSH_CT) ^ CONFIG_REGMASK
+        MODE_CLEAR      = MODE_BITS ^ CONFIG_REGMASK
+        SOFT_RESET      = (1 << RST)
+
     CH1_SHUNT_V     = $01
     CH1_BUS_V       = $02
     CH2_SHUNT_V     = $03

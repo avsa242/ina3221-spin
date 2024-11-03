@@ -64,6 +64,7 @@ PUB startx(SCL_PIN, SDA_PIN, I2C_HZ, ADDR_BITS): status
             time.usleep(core.T_POR)             ' wait for device startup
             _addr_bits := (ADDR_BITS << 1)
             if ( dev_id() == core.DEVID_RESP )  ' validate device 
+                reset()
                 return
     ' if this point is reached, something above failed
     ' Re-check I/O pin assignments, bus speed, connections, power
@@ -78,6 +79,7 @@ PUB stop()
 
 PUB defaults()
 ' Set factory defaults
+    reset()
 
 
 PUB adc2amps(a)
@@ -91,6 +93,7 @@ PUB adc2watts(a)
 
 PUB current_data(): a
 
+
 PUB dev_id(): id
 ' Read device identification
     return readreg(core.DIE_ID)
@@ -98,30 +101,39 @@ PUB dev_id(): id
 
 PUB reset()
 ' Reset the device
+    writereg(core.CONFIG, core.SOFT_RESET)
 
 
-PRI readreg(reg_nr, nr_bytes=2): v | cmd_pkt
-' Read nr_bytes from the device into ptr_buff
+PRI readreg(reg_nr, len=2): v | byte cmd_pkt[2]
+' Read register value
+'   reg_nr:     register
+'   len:        length/number of bytes to read (default: 2)
+'   Returns:    register value
     case reg_nr                                 ' validate register num
-        $00..$FF:
-            cmd_pkt.byte[0] := SLAVE_WR | _addr_bits
-            cmd_pkt.byte[1] := reg_nr
+        $00..$11, $fe, $ff:
+            cmd_pkt[0] := (SLAVE_WR | _addr_bits)
+            cmd_pkt[1] := reg_nr
             v := 0
             i2c.start()
             i2c.wrblock_lsbf(@cmd_pkt, 2)
             i2c.start()
             i2c.wr_byte(SLAVE_RD | _addr_bits)
-            i2c.rdblock_msbf(@v, nr_bytes, i2c.NAK)
+            i2c.rdblock_msbf(@v, len, i2c.NAK)
             i2c.stop()
         other:                                  ' invalid reg_nr
-            return
+            return -1
 
-PRI writereg(reg_nr, val, len=1) | cmd_pkt
-' Write nr_bytes to the device
+
+PRI writereg(reg_nr, val, len=2) | byte cmd_pkt[2]
+' Write register
+'   reg_nr:     register to write
+'   val:        value to write
+'   len:        length/number of bytes to write (default: 2)
+'   Returns:    none
     case reg_nr
-        $00..$FF:
-            cmd_pkt.byte[0] := SLAVE_WR | _addr_bits
-            cmd_pkt.byte[1] := reg_nr
+        $00, $07..$0c, $0e..$11:
+            cmd_pkt[0] := (SLAVE_WR | _addr_bits)
+            cmd_pkt[1] := reg_nr
             i2c.start()
             i2c.wrblock_lsbf(@cmd_pkt, 2)
             i2c.wrblock_msbf(@val, len)
@@ -132,6 +144,8 @@ PRI writereg(reg_nr, val, len=1) | cmd_pkt
 
 DAT
 {
+Copyright 2024 Jesse Burt
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
 including without limitation the rights to use, copy, modify, merge, publish, distribute,

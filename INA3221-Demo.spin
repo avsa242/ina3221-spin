@@ -1,8 +1,9 @@
 {
     --------------------------------------------
     Filename: INA3221-Demo.spin
-    Author:
-    Description:
+    Author: Jesse Burt
+    Description: Demo of the INA3221 driver
+        * power data output
     Copyright (c) 2024
     Started Nov 03, 2024
     Updated Nov 03, 2024
@@ -27,6 +28,7 @@ PUB main()
 
     setup()
     repeat
+
 
 PUB setup
 
