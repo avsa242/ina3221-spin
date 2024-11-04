@@ -28,7 +28,9 @@ PUB main()
 
     setup()
     repeat
-
+        ser.pos_xy(0, 3)
+        'ser.puthexs(sensor.voltage_data(), 4)
+        ser.printf(@"v: %7.7d", sensor.voltage(2))
 
 PUB setup
 

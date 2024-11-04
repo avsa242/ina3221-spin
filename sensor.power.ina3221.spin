@@ -85,7 +85,11 @@ PUB defaults()
 PUB adc2amps(a)
 
 
-PUB adc2volts(a)
+PUB adc2volts(a): v
+' Scale ADC word to voltage
+'   a:          voltage ADC word
+'   Returns:    voltage (micro-volts)
+    return ( a * 8_000 )
 
 
 PUB adc2watts(a)
@@ -118,6 +122,11 @@ PUB reset()
 ' Reset the device
     writereg(core.CONFIG, core.SOFT_RESET)
 
+
+PUB voltage_data(ch=1): v
+' Read the measured bus voltage ADC word
+'   NOTE: If averaging is enabled, this will return the averaged value
+    return ( readreg(core.CH1_BUS_V * (1 #> ch <# 3)) << 15) ~> 18
 
 PRI readreg(reg_nr, len=2): v | byte cmd_pkt[2]
 ' Read register value
