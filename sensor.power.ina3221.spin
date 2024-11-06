@@ -1,13 +1,12 @@
 {
-    --------------------------------------------
-    Filename: sensor.power.ina3221.spin
-    Author:
-    Description:
-    Copyright (c) 2024
-    Started Nov 03, 2024
-    Updated Nov 03, 2024
-    See end of file for terms of use.
-    --------------------------------------------
+----------------------------------------------------------------------------------------------------
+    Filename:       sensor.power.ina3221.spin
+    Description:    Driver for the INA3221 3-channel shunt and bus voltage monitor
+    Author:         Jesse Burt
+    Started:        Nov 3, 2024
+    Updated:        Nov 6, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 }
 
 #include "sensor.power.common.spinh"
@@ -26,6 +25,7 @@ CON
 
 VAR
 
+    long _shunt_res
     byte _addr_bits
 
 
@@ -39,6 +39,7 @@ OBJ
 #endif
     core:   "core.con.ina3221.spin"             ' hw-specific constants
     time:   "time"                              ' basic timing functions
+    math:   "math.unsigned64"                   ' unsigned 64-bit math routines
 
 
 PUB null()
@@ -82,17 +83,35 @@ PUB defaults()
     reset()
 
 
-PUB adc2amps(a)
+PUB preset_adafruit_6062()
+' Preset settings:
+'   Adafruit #6062
+    shunt_resistance(0_050)                     ' 50mOhm shunt resistance
+
+
+PUB adc2amps(a): i
+' Convert shunt voltage and resistance to current measurement
+    ' i :=  v         / r
+    return adc2shunt_volts(a) / _shunt_res
+
+
+PUB adc2shunt_volts(a): v
+' Convert shunt voltage ADC word to voltage
+    return ( a * 40_000 )
 
 
 PUB adc2volts(a): v
-' Scale ADC word to voltage
+' Convert ADC word to voltage
 '   a:          voltage ADC word
 '   Returns:    voltage (micro-volts)
     return ( a * 8_000 )
 
 
 PUB adc2watts(a)
+' Convert ADC word to power
+'   a:          power ADC word
+'   Returns     power (micro-watts)
+    return power_data(a)
 
 
 PUB adc_chan_ena(m=-2): c
@@ -110,7 +129,11 @@ PUB adc_chan_ena(m=-2): c
         return ( (c >> core.CH_EN) & core.CH_EN_BITS )
 
 
-PUB current_data(): a
+PUB current_data(ch=1): a
+' Read measured current data
+'   ch:         ADC channel (1..3, default: 1)
+'   Returns:    current data (=shunt voltage data)
+    return shunt_voltage_data(ch)
 
 
 PUB dev_id(): id
@@ -118,15 +141,52 @@ PUB dev_id(): id
     return readreg(core.DIE_ID)
 
 
+PUB power_data(ch=1): p | sgn
+' Read the measured power ADC word
+    ' emulated: This chip lacks a power register, so calculate it from V*I
+
+    p := voltage_data() * current_data()
+    if ( p & $8000_0000 )                       ' get the sign
+        sgn := -1
+    else
+        sgn := 1
+
+    return math.multdiv(    voltage(), ...      '   s32 V
+                            current(), ...      ' * s32 I
+                            1_000_000) * sgn    ' = u64 P / 1_000_000
+
+
 PUB reset()
 ' Reset the device
     writereg(core.CONFIG, core.SOFT_RESET)
 
 
+PUB shunt_resistance(r=-2): c
+' Set value of shunt resistor
+'   r:          resistance (milliohms)
+'   Returns:    current value if r is unspecified, or outside valid range
+'   NOTE: This must be set correctly for current and power measurements to return valid data
+    case r
+        1..1_000:
+            _shunt_res := r
+        other:
+            return _shunt_res
+
+
+PUB shunt_voltage_data(ch=1): v
+' Get shunt voltage data
+'   ch:         ADC channel (1..3)
+'   Returns:    shunt voltage (microvolts; 0..163_800)
+    ' read shunt voltage ADC, extend sign, right-justify data
+    return ( readreg(core.CH1_SHUNT_V * (1 #> ch <# 3)) << 16) ~> 19
+
+
 PUB voltage_data(ch=1): v
 ' Read the measured bus voltage ADC word
 '   NOTE: If averaging is enabled, this will return the averaged value
-    return ( readreg(core.CH1_BUS_V * (1 #> ch <# 3)) << 15) ~> 18
+    ' read bus voltage ADC, extend sign, right-justify data
+    return ( readreg(core.CH1_BUS_V * (1 #> ch <# 3)) << 16) ~> 19
+
 
 PRI readreg(reg_nr, len=2): v | byte cmd_pkt[2]
 ' Read register value

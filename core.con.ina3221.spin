@@ -1,13 +1,12 @@
 {
-    --------------------------------------------
-    Filename: core.con.ina3221.spin
-    Author: Jesse Burt
-    Description: INA3221-specific constants
-    Copyright (c) 2024
-    Started Nov 3, 2024
-    Updated Nov 3, 2024
-    See end of file for terms of use.
-    --------------------------------------------
+----------------------------------------------------------------------------------------------------
+    Filename:       core.con.ina3221.spin
+    Description:    INA3221-specific constants
+    Author:         Jesse Burt
+    Started:        Nov 3, 2024
+    Updated:        Nov 6, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 }
 
 CON

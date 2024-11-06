@@ -1,14 +1,13 @@
 {
-    --------------------------------------------
-    Filename: INA3221-Demo.spin
-    Author: Jesse Burt
-    Description: Demo of the INA3221 driver
+----------------------------------------------------------------------------------------------------
+    Filename:       INA3221-Demo.spin
+    Description:    Demo of the INA3221 driver
         * power data output
-    Copyright (c) 2024
-    Started Nov 03, 2024
-    Updated Nov 03, 2024
-    See end of file for terms of use.
-    --------------------------------------------
+    Author:         Jesse Burt
+    Started:        Nov 3, 2024
+    Updated:        Nov 6, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 }
 
 CON
@@ -24,13 +23,31 @@ OBJ
     sensor: "sensor.power.ina3221" | SCL=28, SDA=29, I2C_FREQ=100_000
 
 
+CON
+
+    { scaling factors for display }
+    VF  = 1_000_000
+    CF  = 1_000_000
+    PF  = 1_000_000
+
+
 PUB main()
 
     setup()
+
+    ' set INA3221 circuit shunt resistance value in milliohms
+    '   (this must be set for current and power measurements to be valid)
+    sensor.shunt_resistance(50)
+
     repeat
         ser.pos_xy(0, 3)
-        'ser.puthexs(sensor.voltage_data(), 4)
-        ser.printf(@"v: %7.7d", sensor.voltage(2))
+        ser.printf(@"Voltage: %d.%06.6dv\n\r",  (sensor.voltage() / VF), ...    ' whole .
+                                                (sensor.voltage() // VF))       '   part
+        ser.printf(@"Current: %d.%06.6dA\n\r",  (sensor.current() / CF), ...
+                                                ||(sensor.current() // CF))
+        ser.printf(@"Power: %d.%06.6dW\n\r",    (sensor.power() / PF), ...
+                                                (sensor.power() // PF))
+
 
 PUB setup
 
