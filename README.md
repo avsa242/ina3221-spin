@@ -11,6 +11,7 @@ This is a P8X32A/Propeller, P2X8C4M64P/Propeller 2 driver object for the INA3221
 * I2C connection at up to 400kHz
 * Soft-reset
 * Set conversion time (Vbus)
+* Set sample averaging mode
 
 
 ## Requirements

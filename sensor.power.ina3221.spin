@@ -167,6 +167,21 @@ PUB reset()
     writereg(core.CONFIG, core.SOFT_RESET)
 
 
+PUB samples_avg(s=-2): c
+' Set number of samples used for averaging measurements
+'   s:          1, 4, 16, 64, 128, 256, 512, 1024 (default: 1)
+'   Returns:    current value if s is unspecified, or outside valid range
+    c := readreg(core.CONFIG)
+    case s
+        1, 4, 16, 64, 128, 256, 512, 1024:
+            s := lookdownz(s: 1, 4, 16, 64, 128, 256, 512, 1024) << core.AVG
+            s := ((c & core.AVG_CLEAR) | s)
+            writereg(core.CONFIG, s)
+        other:
+            c := (c >> core.AVG) & core.AVG_BITS
+            return lookupz(c: 1, 4, 16, 64, 128, 256, 512, 1024)
+
+
 PUB shunt_resistance(r=-2): c
 ' Set value of shunt resistor
 '   r:          resistance (milliohms)
