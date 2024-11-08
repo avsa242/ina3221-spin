@@ -121,7 +121,7 @@ PUB adc_chan_ena(m=-2): c
 '       b1: CH2
 '       b0: CH3
 '   Returns:
-'       current mask, if m is outside the above range
+'       current mask if m is unspecified or outside the valid range
     c := readreg(core.CONFIG)
     if ( (m => %000) and (m =< %111) )
         writereg(core.CONFIG, (c & core.CH_EN_CLEAR) | (m << core.CH_EN) )
@@ -139,6 +139,36 @@ PUB current_data(ch=1): a
 PUB dev_id(): id
 ' Read device identification
     return readreg(core.DIE_ID)
+
+
+CON
+
+    ' operating modes
+    #0, POWERDN, VSHUNT_TRIGD, VBUS_TRIGD, VSHUNT_VBUS_TRIGD, POWERDN2, VSHUNT_CONT, VBUS_CONT, ...
+    VSHUNT_VBUS_CONT
+
+PUB opmode(m=-2): c
+' Set operation mode
+'   m:
+'       POWERDN (0): Power-down/shutdown
+'       VSHUNT_TRIGD (1): Shunt voltage, triggered
+'       VBUS_TRIGD (2): Bus voltage, triggered
+'       VSHUNT_VBUS_TRIGD (3): Shunt voltage and bus voltage, triggered
+'       POWERDN2 (4): Power-down/shutdown
+'       VSHUNT_CONT (5): Shunt voltage, continuous
+'       VBUS_CONT (6): Bus voltage, continuous
+'       VSHUNT_VBUS_CONT (7): Shunt voltage and bus voltage, continuous (default)
+'   Returns:
+'       current operating mode if m is unspecified or outside the valid range
+    c := readreg(core.CONFIG)
+    case m
+        POWERDN, VSHUNT_TRIGD, VBUS_TRIGD, VSHUNT_VBUS_TRIGD, POWERDN2, VSHUNT_CONT, VBUS_CONT, ...
+        VSHUNT_VBUS_CONT:
+            m := lookdownz(m:   POWERDN, VSHUNT_TRIGD, VBUS_TRIGD, VSHUNT_VBUS_TRIGD, POWERDN2, ...
+                                VSHUNT_CONT, VBUS_CONT, VSHUNT_VBUS_CONT)
+            writereg(core.CONFIG, ((c & core.MODE_CLEAR) | m) )
+        other:
+            return (c & core.MODE_BITS)
 
 
 PUB power_data(ch=1): p | sgn
@@ -170,7 +200,7 @@ PUB reset()
 PUB samples_avg(s=-2): c
 ' Set number of samples used for averaging measurements
 '   s:          1, 4, 16, 64, 128, 256, 512, 1024 (default: 1)
-'   Returns:    current value if s is unspecified, or outside valid range
+'   Returns:    current value if s is unspecified or outside the valid range
     c := readreg(core.CONFIG)
     case s
         1, 4, 16, 64, 128, 256, 512, 1024:
@@ -185,7 +215,7 @@ PUB samples_avg(s=-2): c
 PUB shunt_resistance(r=-2): c
 ' Set value of shunt resistor
 '   r:          resistance (milliohms)
-'   Returns:    current value if r is unspecified, or outside valid range
+'   Returns:    current value if r is unspecified or outside the valid range
 '   NOTE: This must be set correctly for current and power measurements to return valid data
     case r
         1..1_000:
