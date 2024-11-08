@@ -4,7 +4,7 @@
     Description:    INA3221-specific constants
     Author:         Jesse Burt
     Started:        Nov 3, 2024
-    Updated:        Nov 7, 2024
+    Updated:        Nov 8, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
@@ -84,7 +84,12 @@ CON
         TCF             = 1
         CVRF            = 0
         CONV_READY      = 1
-
+        SCC1_3_BITS     = %111
+        CF1_3_BITS      = %111
+        WF1_3_BITS      = %111
+        SCC1_3_CLEAR    = (SCC1_3_BITS << SCC1_3) ^ MASK_ENABLE_REGMASK
+        CF1_3_CLEAR     = (CF1_3_BITS << CF1_3) ^ MASK_ENABLE_REGMASK
+        WF1_3_CLEAR     = (WF1_3_BITS << WF1_3) ^ MASK_ENABLE_REGMASK
 
     POWER_VALID_ULIM    = $10
     POWER_VALID_LLIM    = $11

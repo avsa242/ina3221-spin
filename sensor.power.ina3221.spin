@@ -248,12 +248,33 @@ PUB shunt_resistance(r=-2): c
             return _shunt_res
 
 
+PUB shunt_voltage_sum_data(): v
+' Get summed shunt voltage data
+'   Returns:    shunt voltage ADC word (s15)
+'   NOTE: The value returned here depends on which channels are enabled with
+'       shunt_voltage_sum_channels_ena()
+    ' read shunt voltage ADC, extend sign, right-justify data
+    return ( readreg(core.SHUNT_V_SUM) << 16 ) ~> 17
+
+
 PUB shunt_voltage_data(ch=0): v
 ' Get shunt voltage data
 '   ch:         ADC channel (0..2)
-'   Returns:    shunt voltage (microvolts; 0..163_800)
+'   Returns:    shunt voltage ADC word (s12)
     ' read shunt voltage ADC, extend sign, right-justify data
     return ( readreg(core.CH1_SHUNT_V + ((0 #> ch <# 2)*2) ) << 16) ~> 19
+
+
+PUB shunt_voltage_sum_channels_ena(m): c
+' Set shunt voltage summing channels enabled mask
+'   m:          ADC channel mask (b3..0: ch0, ch1, ch2)
+'   Returns:    current mask if m is outside the allowed range
+    c := readreg(core.MASK_ENABLE)
+    if ( (m => %000) and (m =< %111) )
+        m := (c & core.SCC1_3_CLEAR) | (m << core.SCC1_3)
+        writereg(core.MASK_ENABLE, m)
+    else
+        return ((c >> core.SCC1_3) & core.SCC1_3_BITS)
 
 
 PUB vbus_conv_time(r=-2): c
@@ -288,7 +309,8 @@ PUB vshunt_conv_time(r=-2): c
 
 PUB voltage_data(ch=0): v
 ' Read the measured bus voltage ADC word
-'   ch: ADC channel (default: 0)
+'   ch:         ADC channel (default: 0)
+'   Returns:    bus voltage ADC word (s13)
 '   NOTE: If averaging is enabled, this will return the averaged value
     ' read bus voltage ADC, extend sign, right-justify data
     return ( readreg(core.CH1_BUS_V * (1 #> ch <# 3)) << 16) ~> 19
