@@ -4,7 +4,7 @@
     Description:    Driver for the INA3221 3-channel shunt and bus voltage monitor
     Author:         Jesse Burt
     Started:        Nov 3, 2024
-    Updated:        Nov 7, 2024
+    Updated:        Nov 8, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
@@ -185,6 +185,21 @@ PUB shunt_voltage_data(ch=1): v
 '   Returns:    shunt voltage (microvolts; 0..163_800)
     ' read shunt voltage ADC, extend sign, right-justify data
     return ( readreg(core.CH1_SHUNT_V * (1 #> ch <# 3)) << 16) ~> 19
+
+
+PUB vbus_conv_time(r=-2): c
+' Set bus voltage conversion time
+'   r:          conversion time: 140, 204, 332, 588, 1100, 2116, 4156, 8244 (microseconds)
+'   Returns:    current value if r is outside the allowed range
+    c := readreg(core.CONFIG)
+    case r
+        140, 204, 332, 588, 1100, 2116, 4156, 8244:
+            r := lookdownz(r: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
+            r := (c & core.VBUS_CT_CLEAR) | (r << core.VBUS_CT)
+            writereg(core.CONFIG, r)
+        other:
+            c := ((c >> core.VBUS_CT) & core.VBUS_CT_BITS)
+            return lookupz(c: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
 
 
 PUB voltage_data(ch=1): v
