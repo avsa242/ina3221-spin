@@ -154,6 +154,24 @@ PUB int_set_crit_thresh(thr, ch=0)
     writereg( (core.CH1_CRIT_ALT_LIM + (ch*2) ), ( (thr * _shunt_res) / 40_000) << 3 )
 
 
+PUB int_set_vbus_hi_thresh(thr)
+' Set bus voltage interrupt high threshold
+'   thr:        threshold in microvolts
+    writereg( core.POWER_VALID_ULIM, (thr / 8_000) << 3 )
+
+
+PUB int_set_vbus_lo_thresh(thr)
+' Set bus voltage interrupt low threshold
+'   thr:        threshold in microvolts
+    writereg( core.POWER_VALID_LLIM, (thr / 8_000) << 3 )
+
+
+PUB int_set_vshunt_sum_thresh(thr)
+' Set shunt voltage sum interrupt threshold (sum of all sum-enabled channels)
+'   thr:        threshold in microamperes (signed)
+    writereg(core.SHUNT_V_SUM_LIM, ((thr * _shunt_res) / 40_000) << 1 )
+
+
 PUB int_set_warn_thresh(thr, ch=0)
 ' Set current interrupt threshold (warning limit)
 '   thr:        threshold in microamperes (default is maximum according to the shunt resistance)
@@ -163,6 +181,22 @@ PUB int_set_warn_thresh(thr, ch=0)
         return -1
 
     writereg( (core.CH1_WARN_ALT_LIM + (ch*2) ), ( (thr * _shunt_res) / 40_000) << 3 )
+
+
+PUB int_vbus_hi_thresh(): t
+' Get currenyly set bus voltage interrupt high threshold
+    return ( readreg(core.POWER_VALID_ULIM) >> 3 ) * 8_000
+
+
+PUB int_vbus_lo_thresh(): t
+' Get currenyly set bus voltage interrupt low threshold
+    return ( readreg(core.POWER_VALID_LLIM) >> 3 ) * 8_000
+
+
+PUB int_vshunt_sum_thresh(): t
+' Get currently set shunt voltage sum interrupt threshold (sum of all sum-enabled channels)
+'   Returns:    threshold in microamperes (signed)
+    return ( ( (readreg(core.SHUNT_V_SUM_LIM) << 16) ~> 17) * 40_000)
 
 
 CON

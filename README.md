@@ -10,12 +10,12 @@ This is a P8X32A/Propeller, P2X8C4M64P/Propeller 2 driver object for the INA3221
 
 * I2C connection at up to 400kHz
 * Soft-reset
-* Read bus voltage, shunt voltage, current, and power (per enabled channels), shunt voltage (summed) in ADC words or human-readable values (x1000000 scale integers)
+* Read bus voltage, shunt voltage, current, and power (per enabled channels), shunt voltage (summed), bus voltage (summed) in ADC words or human-readable values (x1000000 scale integers)
 * Set shunt resistance
 * Set conversion time (Vbus, Vshunt)
 * Set sample averaging mode
 * Set operating mode: continuous or single-shot measurements, power down; any combination of bus and shunt voltage measurements
-* Set interrupt thresholds (current)
+* Set interrupt thresholds (current, bus voltage, shunt voltage sum)
 
 
 ## Requirements
