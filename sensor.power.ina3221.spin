@@ -4,7 +4,7 @@
     Description:    Driver for the INA3221 3-channel shunt and bus voltage monitor
     Author:         Jesse Burt
     Started:        Nov 3, 2024
-    Updated:        Nov 6, 2024
+    Updated:        Nov 7, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
@@ -154,6 +154,12 @@ PUB power_data(ch=1): p | sgn
     return math.multdiv(    voltage(), ...      '   s32 V
                             current(), ...      ' * s32 I
                             1_000_000) * sgn    ' = u64 P / 1_000_000
+
+
+PUB power_data_rdy(): f
+' Flag indicating a measurement is ready
+'   Returns: TRUE (-1) or FALSE(0)
+    return ( (readreg(core.MASK_ENABLE) & core.CONV_READY) == 1 )
 
 
 PUB reset()

@@ -5,7 +5,7 @@
         * power data output
     Author:         Jesse Burt
     Started:        Nov 3, 2024
-    Updated:        Nov 6, 2024
+    Updated:        Nov 7, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
@@ -40,6 +40,7 @@ PUB main()
     sensor.shunt_resistance(50)
 
     repeat
+        repeat until sensor.power_data_rdy()    ' wait for a new measurement
         ser.pos_xy(0, 3)
         ser.printf(@"Voltage: %d.%06.6dv\n\r",  (sensor.voltage() / VF), ...    ' whole .
                                                 (sensor.voltage() // VF))       '   part

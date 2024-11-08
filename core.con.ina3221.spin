@@ -4,7 +4,7 @@
     Description:    INA3221-specific constants
     Author:         Jesse Burt
     Started:        Nov 3, 2024
-    Updated:        Nov 6, 2024
+    Updated:        Nov 7, 2024
     Copyright (c) 2024 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
@@ -12,11 +12,11 @@
 CON
 
 ' I2C Configuration
-    I2C_MAX_FREQ    = 400_000                   ' device max I2C bus freq
-    SLAVE_ADDR      = $40 << 1                  ' 7-bit format slave address
-    T_POR           = 0                         ' startup time (usecs)
+    I2C_MAX_FREQ        = 400_000                   ' device max I2C bus freq
+    SLAVE_ADDR          = $40 << 1                  ' 7-bit format slave address
+    T_POR               = 0                         ' startup time (usecs)
 
-    DEVID_RESP      = $3220                     ' device ID expected response
+    DEVID_RESP          = $3220                     ' device ID expected response
 
 ' Register definitions
     CONFIG              = $00
@@ -57,29 +57,44 @@ CON
         MODE_CLEAR      = MODE_BITS ^ CONFIG_REGMASK
         SOFT_RESET      = (1 << RST)
 
-    CH1_SHUNT_V     = $01
-    CH1_BUS_V       = $02
-    CH2_SHUNT_V     = $03
-    CH2_BUS_V       = $04
-    CH3_SHUNT_V     = $05
-    CH3_BUS_V       = $06
-    CH1_CRIT_ALT_LIM= $07
-    CH1_WARN_ALT_LIM= $08
-    CH2_CRIT_ALT_LIM= $09
-    CH2_WARN_ALT_LIM= $0a
-    CH3_CRIT_ALT_LIM= $0b
-    CH3_WARN_ALT_LIM= $0c
-    SHUNT_V_SUM     = $0d
-    SHUNT_V_SUM_LIM = $0e
-    MASK_ENABLE     = $0f
-    POWER_VALID_ULIM= $10
-    POWER_VALID_LLIM= $11
-    MFR_ID          = $fe
-    DIE_ID          = $ff
+    CH1_SHUNT_V         = $01
+    CH1_BUS_V           = $02
+    CH2_SHUNT_V         = $03
+    CH2_BUS_V           = $04
+    CH3_SHUNT_V         = $05
+    CH3_BUS_V           = $06
+    CH1_CRIT_ALT_LIM    = $07
+    CH1_WARN_ALT_LIM    = $08
+    CH2_CRIT_ALT_LIM    = $09
+    CH2_WARN_ALT_LIM    = $0a
+    CH3_CRIT_ALT_LIM    = $0b
+    CH3_WARN_ALT_LIM    = $0c
+    SHUNT_V_SUM         = $0d
+    SHUNT_V_SUM_LIM     = $0e
+
+    MASK_ENABLE         = $0f
+    MASK_ENABLE_REGMASK = $7fff
+        SCC1_3          = 12
+        WEN             = 11
+        CEN             = 10
+        CF1_3           = 7
+        SF              = 6
+        WF1_3           = 3
+        PVF             = 2
+        TCF             = 1
+        CVRF            = 0
+        CONV_READY      = 1
+
+
+    POWER_VALID_ULIM    = $10
+    POWER_VALID_LLIM    = $11
+    MFR_ID              = $fe
+    DIE_ID              = $ff
 
 
 PUB null()
 ' This is not a top-level object
+
 
 DAT
 {
