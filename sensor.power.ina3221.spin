@@ -217,6 +217,21 @@ PUB vbus_conv_time(r=-2): c
             return lookupz(c: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
 
 
+PUB vshunt_conv_time(r=-2): c
+' Set shunt voltage conversion time
+'   r:          conversion time: 140, 204, 332, 588, 1100, 2116, 4156, 8244 (microseconds)
+'   Returns:    current value if r is outside the allowed range
+    c := readreg(core.CONFIG)
+    case r
+        140, 204, 332, 588, 1100, 2116, 4156, 8244:
+            r := lookdownz(r: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
+            r := (c & core.VSH_CT_CLEAR) | (r << core.VSH_CT)
+            writereg(core.CONFIG, r)
+        other:
+            c := ((c >> core.VSH_CT) & core.VSH_CT_BITS)
+            return lookupz(c: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
+
+
 PUB voltage_data(ch=1): v
 ' Read the measured bus voltage ADC word
 '   NOTE: If averaging is enabled, this will return the averaged value
