@@ -117,9 +117,9 @@ PUB adc2watts(a)
 PUB adc_chan_ena(m=-2): c
 ' Enable ADC channels
 '   m:  bitmask of enabled channels
-'       b2: CH1
-'       b1: CH2
-'       b0: CH3
+'       b2: CH0 (CH1 according to datasheet)
+'       b1: CH1 (CH2 according to datasheet)
+'       b0: CH2 (CH3 according to datasheet)
 '   Returns:
 '       current mask if m is unspecified or outside the valid range
     c := readreg(core.CONFIG)
@@ -129,16 +129,40 @@ PUB adc_chan_ena(m=-2): c
         return ( (c >> core.CH_EN) & core.CH_EN_BITS )
 
 
-PUB current_data(ch=1): a
+PUB current_data(ch=0): a
 ' Read measured current data
-'   ch:         ADC channel (1..3, default: 1)
+'   ch:         ADC channel (0..2, default: 0)
 '   Returns:    current data (=shunt voltage data)
+    ' this chip doesn't have a current monitoring reg, so we return the next closest thing to
+    '   a 'raw' value: the shunt voltage data
     return shunt_voltage_data(ch)
 
 
 PUB dev_id(): id
 ' Read device identification
     return readreg(core.DIE_ID)
+
+
+PUB int_set_crit_thresh(thr, ch=0)
+' Set current interrupt threshold (critical limit)
+'   thr:        threshold in microamperes (default is maximum according to the shunt resistance)
+'   ch:         channel to set threshold for (default is 0 if unspecified)
+'   Returns:    none, or -1 if an invalid channel was specified
+    if ( (ch < 0) or (ch > 2) )
+        return -1
+
+    writereg( (core.CH1_CRIT_ALT_LIM + (ch*2) ), ( (thr * _shunt_res) / 40_000) << 3 )
+
+
+PUB int_set_warn_thresh(thr, ch=0)
+' Set current interrupt threshold (warning limit)
+'   thr:        threshold in microamperes (default is maximum according to the shunt resistance)
+'   ch:         channel to set threshold for (default is 0 if unspecified)
+'   Returns:    none, or -1 if an invalid channel was specified
+    if ( (ch < 0) or (ch > 2) )
+        return -1
+
+    writereg( (core.CH1_WARN_ALT_LIM + (ch*2) ), ( (thr * _shunt_res) / 40_000) << 3 )
 
 
 CON
@@ -171,7 +195,7 @@ PUB opmode(m=-2): c
             return (c & core.MODE_BITS)
 
 
-PUB power_data(ch=1): p | sgn
+PUB power_data(ch=0): p | sgn
 ' Read the measured power ADC word
     ' emulated: This chip lacks a power register, so calculate it from V*I
 
@@ -224,12 +248,12 @@ PUB shunt_resistance(r=-2): c
             return _shunt_res
 
 
-PUB shunt_voltage_data(ch=1): v
+PUB shunt_voltage_data(ch=0): v
 ' Get shunt voltage data
-'   ch:         ADC channel (1..3)
+'   ch:         ADC channel (0..2)
 '   Returns:    shunt voltage (microvolts; 0..163_800)
     ' read shunt voltage ADC, extend sign, right-justify data
-    return ( readreg(core.CH1_SHUNT_V * (1 #> ch <# 3)) << 16) ~> 19
+    return ( readreg(core.CH1_SHUNT_V + ((0 #> ch <# 2)*2) ) << 16) ~> 19
 
 
 PUB vbus_conv_time(r=-2): c
@@ -262,8 +286,9 @@ PUB vshunt_conv_time(r=-2): c
             return lookupz(c: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
 
 
-PUB voltage_data(ch=1): v
+PUB voltage_data(ch=0): v
 ' Read the measured bus voltage ADC word
+'   ch: ADC channel (default: 0)
 '   NOTE: If averaging is enabled, this will return the averaged value
     ' read bus voltage ADC, extend sign, right-justify data
     return ( readreg(core.CH1_BUS_V * (1 #> ch <# 3)) << 16) ~> 19

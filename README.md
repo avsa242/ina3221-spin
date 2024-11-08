@@ -13,6 +13,7 @@ This is a P8X32A/Propeller, P2X8C4M64P/Propeller 2 driver object for the INA3221
 * Set conversion time (Vbus, Vshunt)
 * Set sample averaging mode
 * Set operating mode
+* Set interrupt thresholds (current)
 
 
 ## Requirements
